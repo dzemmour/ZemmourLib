@@ -68,6 +68,19 @@ ImmgenTFeaturePlots = function(so_orig, so_list = Seurat::SplitObject(so_orig, s
     gridExtra::grid.arrange(grobs = ps2_level2_list, ncol = 3, nrow = ceiling(length(ps2_level2_list)/3)) # Adjusted nrow
 
 }
+#' @examples
+#' \dontrun{
+#' # This example demonstrates the use of ImmgenTFeaturePlots.
+#' so_orig = NormalizeData(so_orig,assay = "RNA", normalization.method = "LogNormalize",verbose = T)
+#' so_list = SplitObject(so_orig, split.by = "annotation_level1") # Split the seurat object
+#' so_list[["thymocyte"]] = NULL # Remove thymocytes from the lists
+#' mypal_level2 = immgent_colors$level2
+#' mygene = "Cd4" # The gene to plot
+#' pdf(sprintf("misc_plots/FeaturePlot_%s.pdf",mygene), width = 20, height = 20, useDingbats = F)
+#' ImmgenTFeaturePlots(so_orig, so_list, gene = mygene, slot = "data")
+#' dev.off()
+#' } # End \dontrun
+
 
 #' Generate Feature Scatter Plots with Highlighted Cell Density
 #'

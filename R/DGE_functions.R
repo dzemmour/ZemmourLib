@@ -1,7 +1,3 @@
-
-
-
-
 #' Run Limma-Trend Differential Gene Expression with Confounding Variables
 #'
 #' This function performs differential gene expression analysis using `limma-trend`
@@ -14,29 +10,34 @@
 #' @param formula.mod.matrix Character string, the R formula for the design matrix (e.g., "~ group + confoundings[[1]]").
 #' @param contrasts A named list of character strings defining the contrasts to be made.
 #' @param gene_symbol A vector of gene symbols corresponding to the rows of `tmm`.
-#' @import limma
-#' @import edgeR
 #' @return A named list of `topTable` results for each contrast.
 #' @export
 run_limmatrend_contrasts_counfoundings = function(tmm = tmm, group = group, confoundings = confoundings, formula.mod.matrix = formula.mod.matrix, contrasts =contrasts, gene_symbol= gene_symbol) { #count = count, dge = dge,
-    suppressPackageStartupMessages(library(limma))
-    suppressPackageStartupMessages(library(edgeR))
+    # Check for required packages and provide a helpful error message if missing
+    if (!requireNamespace("limma", quietly = TRUE)) {
+        stop("Package 'limma' is required for 'run_limmatrend_contrasts_counfoundings' but is not installed. Please install it using install.packages('limma').", call. = FALSE)
+    }
+    if (!requireNamespace("edgeR", quietly = TRUE)) {
+        stop("Package 'edgeR' is required for 'run_limmatrend_contrasts_counfoundings' but is not installed. Please install it using install.packages('edgeR').", call. = FALSE)
+    }
+
     message("limmatrend")
 
     design = model.matrix(formula(formula.mod.matrix))
-    colnames(design) = gsub(paste(c("group", sprintf("confoundings\\[\\[%s\\]\\]", seq_along(confoundings))), collapse = "|"), "", colnames(design)) # Adjusted to seq_along(confoundings)
-    cont.matrix = makeContrasts( contrasts = contrasts, levels = design)
+    colnames(design) = gsub(paste(c("group", sprintf("confoundings\\[\\[%s\\]\\]", seq_along(confoundings))), collapse = "|"), "", colnames(design))
+    # Explicitly call functions from limma
+    cont.matrix = limma::makeContrasts( contrasts = contrasts, levels = design)
     colnames(cont.matrix) = names(contrasts)
 
     message("lmFit")
-    fit = lmFit(tmm, design = design)
-    fit2 = contrasts.fit(fit, cont.matrix)
-    fit2 = eBayes(fit2, trend = TRUE, robust = TRUE)
+    fit = limma::lmFit(tmm, design = design)
+    fit2 = limma::contrasts.fit(fit, cont.matrix)
+    fit2 = limma::eBayes(fit2, trend = TRUE, robust = TRUE)
 
     tt_list = list()
     for (i in colnames(cont.matrix)) {
         print(i)
-        tt_list[[i]] = topTable(fit2,coef = i ,n = Inf, adjust.method = "BH", sort.by = "none")
+        tt_list[[i]] = limma::topTable(fit2,coef = i ,n = Inf, adjust.method = "BH", sort.by = "none")
         tt_list[[i]]$SYMBOL = gene_symbol
     }
 

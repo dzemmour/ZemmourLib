@@ -1,0 +1,19 @@
+---
+title: "making_updates"
+output: html_document
+date: "2025-07-15"
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r}
+library(devtools)
+
+mypal_list = readRDS("/Users/david/Library/CloudStorage/Box-Box/ZemmourLab_David/ZemmourLib/data/immgent_color_palettes_list_20250709.Rds")
+
+usethis::use_data(mypal_list, internal = FALSE, overwrite = TRUE) # internal = FALSE makes it externally available
+devtools::document()
+devtools::install()
+```
+

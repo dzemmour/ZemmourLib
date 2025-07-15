@@ -15,7 +15,7 @@
 #' @import ggplot2
 #' @importFrom scattermore geom_scattermore
 #' @importFrom grDevices densCols colorRampPalette
-#' @importFrom graphics rainbow
+#' @importFrom grDevices rainbow
 #' @return A ggplot object.
 #' @export
 MyFeatureScatter = function(so = so, assay = "ADT", slot = "data", feature1 = NULL, feature2 = NULL, group.by = sprintf("is_%s", cl), split.by = NULL, raster = T, cols = rev(rainbow(10, end = 4/6))) {
@@ -303,7 +303,7 @@ MyDimPlotHighlight <- function(seurat_object = so,
 #' @import ggplot2
 #' @importFrom scattermore geom_scattermore
 #' @importFrom grDevices densCols colorRampPalette
-#' @importFrom graphics rainbow
+#' @importFrom grDevices rainbow
 #' @return A ggplot object.
 #' @export
 MyDimPlotHighlightDensity = function(seurat_object = so, umap_to_plot = "mde_incremental",group.by = sprintf("is_%s", cl), split.by = NULL, raster = T, highlight_size = 0.5, highlight_alpha = 0.5, cols = rev(rainbow(10, end = 4/6))) {

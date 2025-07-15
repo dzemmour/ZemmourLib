@@ -12,17 +12,22 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports:
-Suggests: 
     RColorBrewer,
     ggplot2,
-    Seurat,
     scattermore,
     dplyr,
     rlang,
     stringr,
     ggbeeswarm,
-    limma,
-    edgeR,
     scales,
     ggrepel,
-    ggrastr
+    ggrastr,
+    pals
+Suggests: 
+    Seurat,
+    limma,
+    edgeR,
+    viridis
+Depends: 
+    R (>= 3.5)
+LazyData: true

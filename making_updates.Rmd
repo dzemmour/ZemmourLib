@@ -11,7 +11,7 @@ Add immgenT color palettes
 ```{r}
 library(devtools)
 
-immgent_colors = readRDS("/Users/david/Library/CloudStorage/Box-Box/ZemmourLab_David/ZemmourLib/data/immgent_color_palettes_list_20250709.Rds")
+immgent_colors = readRDS("/Users/david/Library/CloudStorage/Box-Box/ZemmourLab_David/ZemmourLib/data/immgent_color_palettes_list_20250714.Rds")
 
 usethis::use_data(immgent_colors, internal = FALSE, overwrite = TRUE) # internal = FALSE makes it externally available
 devtools::document()

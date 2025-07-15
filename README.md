@@ -1,3 +1,4 @@
+````markdown
 # ZemmourLib 
 # <img src="man/figures/logo.png" align="center" height="138" />
 
@@ -14,42 +15,49 @@ devtools::install_github("dzemmour/ZemmourLib")
 
 ## Core Features
 
-`ZemmourLib` provides a suite of functions categorized for ease of use:
+`ZemmourLib` provides a suite of functions and data categorized for ease of use:
 
 ### 1\. Seurat Object Utilities & Visualization
 
-  * **`MyPlots()`**: Generate various UMAP plots for Seurat objects, including coloring by metadata, splitting by conditions, and visualizing gene expression.
-  * **`MyDimPlotHighlight()`**: Create UMAP plots with specific cell subsets highlighted and optionally labeled.
-  * **`MyDimPlotHighlightDensity()`**: Visualize UMAPs with the density of highlighted cell populations.
-  * **`MyFeatureScatter()`**: Generate scatter plots (e.g., for ADT features) with highlighted population density, akin to flow cytometry plots.
-  * **`ConvertS5toS3()`**: Convert Seurat V5 objects to a Seurat V3-like structure.
+  * **`ImmgenTFeaturePlots()`**: Generates a series of UMAP and Feature plots tailored for ImmgenT single-cell data, visualizing overall expression and expression within different annotation levels.
+  * **`MyDimPlotHighlight()`**: Creates UMAP plots with specific cell subsets highlighted and optionally labeled.
+  * **`MyDimPlotHighlightDensity()`**: Visualizes UMAPs with the density of highlighted cell populations.
+  * **`MyFeatureScatter()`**: Generates scatter plots (e.g., for ADT features) with highlighted population density, akin to flow cytometry plots.
+  * **`ConvertS5toS3()`**: Converts Seurat V5 objects to a Seurat V3-like structure.
   * **`PlotsAfterIntegration()`**: A specialized plotting function for visualizing Seurat objects post-integration.
-  * **`AddLatentData()`**: Add external latent space embeddings (e.g., from totalVI, MDE, PCA) into a Seurat object.
+  * **`AddLatentData()`**: Adds external latent space embeddings (e.g., from totalVI, MDE, PCA) into a Seurat object.
 
 ### 2\. Differential Expression Analysis (DEA) with `limma-trend`
 
-  * **`ensure_directory()`**: A helper to ensure output directories exist.
-  * **`run_limmatrend_contrasts_counfoundings()`**: Perform differential gene expression analysis using `limma-trend` with support for confounding variables and multiple contrasts.
-  * **`GetGroups()`**: Identify cell IDs for defined groups and check for metadata balance between them, crucial for robust DEA.
-  * **`CreateComparisonName()`**: Generate consistent comparison names from filter expressions.
-  * **`CollapseDiff_limmatrend()`**: Consolidate `limma-trend` `topTable` results from multiple contrasts into a single, merged data frame.
-  * **`Vplot()`**: Create a "V-plot" (volcano plot variant with log Fold Change on X-axis).
-  * **`VplotAddSig()`**: Add significance highlighting and chi-squared test statistics to a V-plot.
-  * **`FCFCplot()`**: Generate a Fold Change vs. Fold Change plot to compare results across two conditions or analyses, with optional gene labeling.
+  * **`run_limmatrend_contrasts_counfoundings()`**: Performs differential gene expression analysis using `limma-trend` with support for confounding variables and multiple contrasts.
+  * **`GetGroups()`**: Identifies cell IDs for defined groups and checks for metadata balance between them, crucial for robust DEA.
+  * **`CreateComparisonName()`**: Generates consistent comparison names from filter expressions.
+  * **`CollapseDiff_limmatrend()`**: Consolidates `limma-trend` `topTable` results from multiple contrasts into a single, merged data frame.
+  * **`Vplot()`**: Creates a "V-plot" (volcano plot variant with log Fold Change on X-axis).
+  * **`VplotAddSig()`**: Adds significance highlighting and chi-squared test statistics to a V-plot.
+  * **`FCFCplot()`**: Generates a Fold Change vs. Fold Change plot to compare results across two conditions or analyses, with optional gene labeling.
 
 ### 3\. Milo Differential Abundance Analysis
 
-  * **`MyplotDAbeeswarm()`**: Visualize differential abundance results from `miloR` as a beeswarm plot.
+  * **`MyplotDAbeeswarm()`**: Visualizes differential abundance results from `miloR` as a beeswarm plot.
 
 ### 4\. Utility Functions
 
-  * **`extract_numeric()`**: Extract numeric characters from strings.
-  * **`removeDuplicateColumns()`**: Remove columns that are exact duplicates in a data frame.
-  * **`SplitColors()` / `sp()`**: Generate a color palette with varying alpha transparencies for sub-categories.
-  * **`TpTnFpFn()`**: Calculate True Positives, True Negatives, False Positives, and False Negatives.
-  * **`SeSpPPVNPV()`**: Calculate Sensitivity, Specificity, Positive Predictive Value (PPV), and Negative Predictive Value (NPV).
-  * **`NoGrid()`**: A `ggplot2` theme helper to remove grid lines.
+  * **`extract_numeric()`**: Extracts all numeric characters from a string and converts them to numeric.
+  * **`ensure_directory()`**: Checks if a directory exists and creates it if it doesn't.
+  * **`SplitColors()`**: Generates a color palette with varying alpha transparencies for sub-categories.
+  * **`removeDuplicateColumns()`**: Removes columns that are exact duplicates in a data frame.
+  * **`TpTnFpFn()`**: Calculates True Positives, True Negatives, False Positives, and False Negatives.
+  * **`SeSpPPVNPV()`**: Calculates Sensitivity, Specificity, Positive Predictive Value (PPV), and Negative Predictive Value (NPV).
+
+### 5\. Plotting Helper Themes
+
+  * **`NoGrid()`**: A `ggplot2` theme helper to remove major and minor grid lines.
   * **`NoLegend()`**: A `ggplot2` theme helper to remove the legend.
+
+### 6\. Data Objects
+
+  * **`immgent_colors`**: A named list of custom color palettes for ImmgenT data, organized by levels and organ types.
 
 ## Usage Examples
 
@@ -59,7 +67,7 @@ Here are some brief examples to get you started. For more detailed usage and par
 library(ZemmourLib)
 library(Seurat)
 library(ggplot2)
-libary(dplyr)
+library(dplyr)
 
 # --- Example 1: Using a Plotting Function ---
 # Assuming 'so' is a loaded Seurat object with UMAP embeddings and metadata
@@ -133,3 +141,4 @@ Contributions to `ZemmourLib` are welcome\! If you have suggestions for improvem
 
 This package is licensed under the MIT License. See the `LICENSE` file for more details.
 
+````

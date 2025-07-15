@@ -1,4 +1,5 @@
-# ZemmourLib <img src="man/figures/logo.png" align="center" height="138" />
+# ZemmourLib 
+# <img src="man/figures/logo.png" align="center" height="138" />
 
 A collection of custom R functions primarily designed for analyzing single-cell RNA-seq, especially useful with [Seurat](https://satijalab.org/seurat/) objects. It includes utilities for UMAP visualization, differential expression analysis with `limma-trend`, and other data processing tasks.
 

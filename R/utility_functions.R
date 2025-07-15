@@ -29,7 +29,6 @@ ensure_directory <- function(path) {
     invisible(dir.exists(path))
 }
 
-
 #' Generate a Color Palette with Split Alpha Values
 #'
 #' This function takes an existing color palette and creates a new one
@@ -86,3 +85,4 @@ removeDuplicateColumns <- function(df) {
     return(dfUnique)
 }
 
+#test

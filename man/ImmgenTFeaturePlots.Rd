@@ -46,3 +46,16 @@ single-cell data, visualizing overall expression and expression within
 different annotation levels (e.g., CD4, CD8 subsets). It assumes data is
 already normalized.
 }
+\examples{
+\dontrun{
+# This example demonstrates the use of ImmgenTFeaturePlots.
+so_orig = NormalizeData(so_orig,assay = "RNA", normalization.method = "LogNormalize",verbose = T)
+so_list = SplitObject(so_orig, split.by = "annotation_level1") # Split the seurat object
+so_list[["thymocyte"]] = NULL # Remove thymocytes from the lists
+mypal_level2 = immgent_colors$level2
+mygene = "Cd4" # The gene to plot
+pdf(sprintf("FeaturePlot_\%s.pdf",mygene), width = 20, height = 20, useDingbats = F)
+ImmgenTFeaturePlots(so_orig, so_list, gene = mygene, slot = "data")
+dev.off()
+} # End \dontrun
+}

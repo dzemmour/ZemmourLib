@@ -1,9 +1,7 @@
-````markdown
 # ZemmourLib 
 # <img src="man/figures/logo.png" align="center" height="138" />
 
 A collection of custom R functions primarily designed for analyzing single-cell RNA-seq, especially useful with [Seurat](https://satijalab.org/seurat/) objects. It includes utilities for UMAP visualization, differential expression analysis with `limma-trend`, and other data processing tasks.
-
 ## Installation
 
 You can install the development version of `ZemmourLib` from GitHub with `devtools`:
@@ -141,4 +139,3 @@ Contributions to `ZemmourLib` are welcome\! If you have suggestions for improvem
 
 This package is licensed under the MIT License. See the `LICENSE` file for more details.
 
-````

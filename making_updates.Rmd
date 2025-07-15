@@ -1,5 +1,5 @@
 ---
-title: "making_updates"
+title: "Modifying Functions to the R Package"
 output: html_document
 date: "2025-07-15"
 editor_options: 
@@ -7,6 +7,7 @@ editor_options:
 ---
 
 
+Add immgenT color palettes
 ```{r}
 library(devtools)
 
@@ -16,4 +17,84 @@ usethis::use_data(immgent_colors, internal = FALSE, overwrite = TRUE) # internal
 devtools::document()
 devtools::install()
 ```
+
+## Summary: Adding New Functions to Your R Package
+
+To add new functions to your R package, you essentially place your new `.R` files containing the functions into the `R/` directory of your package. You then add special `roxygen2` comments to each function to provide documentation and manage package exports and imports. Finally, you use `devtools` to build the documentation and reinstall the package, making your new functions available.
+
+## Step-by-Step Guide with Code
+
+Let's assume you have a new function called `my_new_helper` that you want to add.
+
+**Goal:** Add `my_new_helper` to `ZemmourLib`.
+
+### 1. Create a New R File in `R/`
+
+* Navigate to the `R/` subdirectory within your `ZemmourLib` package.
+* Create a new `.R` file (e.g., `new_functions.R` or `helper_functions.R`) and add your function to it. If you're adding functions related to existing categories, you might add them to an existing file (e.g., a new plotting function to `plot_functions.R`).
+
+**Example: `R/new_functions.R`**
+
+```{r}
+#' My New Helper Function
+#'
+#' This function performs a simple operation.
+#'
+#' @param x A numeric value.
+#' @param y A numeric value.
+#' @return The sum of x and y, multiplied by 2.
+#' @examples
+#' my_new_helper(5, 3)
+#' @export
+my_new_helper <- function(x, y) {
+  return((x + y) * 2)
+}
+```
+
+### 2. Add Roxygen Comments
+
+As shown in the example above, ensure you add `roxygen2` comments (starting with `#'`) directly above your function.
+
+* `#'`: Starts a roxygen comment block.
+* `@param`: Describes each function parameter.
+* `@return`: Describes what the function returns.
+* `@examples`: Provides runnable examples of how to use the function.
+* `@export`: **Crucial!** This makes your function available to users when they load your package. If you omit this, the function will only be usable internally by other functions in your package.
+* `@importFrom packageName functionName`: If your new function uses functions from other packages that are in your `DESCRIPTION`'s `Imports` section, add these tags.
+* **Conditional `requireNamespace()` for `Suggests`:** If your new function uses a package from your `DESCRIPTION`'s `Suggests` section, do *not* use `@importFrom`. Instead, add a check inside your function:
+
+```{r}
+    if (!requireNamespace("SuggestedPkg", quietly = TRUE)) {
+      stop("Package 'SuggestedPkg' is required for this function. Please install it with install.packages('SuggestedPkg').", call. = FALSE)
+    }
+    # Then use SuggestedPkg::function() throughout your code
+```
+
+### 3. Update `DESCRIPTION` (if necessary)
+
+If your new function introduces a dependency on a *new* package that is not already listed, you **must** add it to either the `Imports` or `Suggests` section of your `DESCRIPTION` file.
+Open `DESCRIPTION` and add the new package name, following the correct format (e.g., `NewPackage,` in `Imports:` or `Suggests:`).
+
+### 4. Generate Documentation and Reinstall
+
+Open your `ZemmourLib` RStudio Project.
+**Delete the `NAMESPACE` file** in the root of your package directory (this ensures `roxygen2` generates a fresh one that includes your new function's exports/imports).
+Run `devtools::document()`: This command processes your roxygen comments, updates documentation files in `man/`, and regenerates the `NAMESPACE` file.
+
+```{r}
+devtools::install()
+```
+
+### 5. Test Your New Function
+
+Load your package and test the new function:
+
+````{r}
+library(ZemmourLib)
+my_new_helper(10, 2)
+?my_new_helper # Check the help page
+```
+
+
+
 

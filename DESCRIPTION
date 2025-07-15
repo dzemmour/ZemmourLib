@@ -1,6 +1,6 @@
 Package: ZemmourLib
 Title: A Collection of Custom R Functions from Zemmour Lab
-Version: 0.1.0
+Version: 0.1.1
 Authors@R:
     person("David", "Zemmour", email = "zemmour@uchicago.edu", role = c("aut", "cre"))
 Description: This package provides a set of custom R functions primarily designed for
@@ -27,7 +27,8 @@ Suggests:
     Seurat,
     limma,
     edgeR,
-    viridis
+    viridis,
+    gridExtra
 Depends: 
     R (>= 3.5)
 LazyData: true

@@ -1,3 +1,74 @@
+#' Generate Feature Plots for ImmgenT Single-Cell Data
+#'
+#' This function creates a series of UMAP and Feature plots tailored for ImmgenT
+#' single-cell data, visualizing overall expression and expression within
+#' different annotation levels (e.g., CD4, CD8 subsets). It assumes data is
+#' already normalized.
+#'
+#' @param so_orig A Seurat object containing the overall dataset.
+#' @param so_list A named list of Seurat objects, typically created by
+#'   `SplitObject(so_orig, split.by = "annotation_level1")`. Defaults to this split.
+#' @param gene Character string, the gene to plot expression for.
+#' @param slot Character string, the data slot to pull gene expression from (e.g., "data", "counts"). Defaults to "data".
+#' @param reduction_overall Character string, the name of the dimensionality reduction
+#'   to use for the overall (unsplit) plots. Defaults to "mde2_totalvi_20241006".
+#' @param reduction_level2 Character string, the name of the dimensionality reduction
+#'   to use for the level 2 (split) plots. Defaults to "mde_incremental".
+#' @param mypal_level1 A character vector of colors for `annotation_level1`.
+#'   Defaults to `ZemmourLib::immgent_colors[["level1"]]`.
+#' @param mypal_level2 A character vector of colors for `annotation_level2`.
+#'   Defaults to `ZemmourLib::immgent_colors[["level2"]]`.
+#' @importFrom Seurat DimPlot FeaturePlot SplitObject NormalizeData
+#' @importFrom ggplot2 scale_color_manual ggtitle theme_void
+#' @return Prints several ggplot objects and arranges them using `grid.arrange`.
+#' @export
+ImmgenTFeaturePlots = function(so_orig, so_list = Seurat::SplitObject(so_orig, split.by = "annotation_level1"), gene = "Cd4", slot = "data", reduction_overall = "mde2_totalvi_20241006", reduction_level2 = "mde_incremental",mypal_level1 = ZemmourLib::immgent_colors[["level1"]], mypal_level2 = ZemmourLib::immgent_colors[["level2"]]) {
+    if (!requireNamespace("Seurat", quietly = TRUE)) {
+        stop("Package 'gridExtra' is required for this function but is not installed. Please install it using install.packages('gridExtra').", call. = FALSE)
+    }
+    if (!requireNamespace("gridExtra", quietly = TRUE)) {
+        stop("Package 'gridExtra' is required for this function but is not installed. Please install it using install.packages('gridExtra').", call. = FALSE)
+    }
+
+    level1_annotations = c("CD4", "CD8", "Treg", "gdT", "CD8aa", "nonconv", "DN", "DP")
+
+    ps1_overall = Seurat::DimPlot(so_orig, reduction = reduction_overall, group.by = "annotation_level1", raster = T, raster.dpi = c(1024,1024), label = T) +
+        ggplot2::scale_color_manual(values = mypal_level1) +
+        ggplot2::ggtitle("") +
+        ggplot2::theme_void() +
+        ZemmourLib::NoLegend() # Using your package's NoLegend function
+    print(ps1_overall)
+
+    ps2_overall = Seurat::FeaturePlot(so_orig, reduction = reduction_overall, slot = slot, features = gene, order = FALSE, raster = T, raster.dpi = c(1024,1024)) +
+        ggplot2::ggtitle(sprintf("%s", gene)) +
+        ggplot2::theme_void() +
+        ZemmourLib::NoLegend()
+    print(ps2_overall)
+
+    ps1_level2_list = list()
+    ps2_level2_list = list()
+
+    for (l in level1_annotations) {
+        if (!is.null(so_list[[l]])) { # Check if the split object for this level exists
+            print(l)
+            ps1_level2_list[[l]] = Seurat::DimPlot(so_list[[l]], reduction = reduction_level2, group.by = "annotation_level2", raster = T, raster.dpi = c(1024,1024), label = T) +
+                ggplot2::scale_color_manual(values = mypal_level2) +
+                ggplot2::ggtitle(sprintf("MDE %s", l)) +
+                ggplot2::theme_void() +
+                ZemmourLib::NoLegend()
+            ps2_level2_list[[l]] = Seurat::FeaturePlot(so_list[[l]], reduction = reduction_level2, slot = slot, features = gene, order = FALSE, raster = T, raster.dpi = c(1024,1024)) +
+                ggplot2::ggtitle(sprintf("MDE %s, gene %s", l, gene)) +
+                ggplot2::theme_void() +
+                ZemmourLib::NoLegend()
+        } else {
+            message(paste("Skipping", l, "as corresponding Seurat object not found in so_list."))
+        }
+    }
+    gridExtra::grid.arrange(grobs = ps1_level2_list, ncol = 3, nrow = ceiling(length(ps1_level2_list)/3)) # Adjusted nrow
+    gridExtra::grid.arrange(grobs = ps2_level2_list, ncol = 3, nrow = ceiling(length(ps2_level2_list)/3)) # Adjusted nrow
+
+}
+
 #' Generate Feature Scatter Plots with Highlighted Cell Density
 #'
 #' This function creates scatter plots (e.g., for ADT features) highlighting a

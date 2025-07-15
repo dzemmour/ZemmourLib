@@ -1,7 +1,7 @@
 ````markdown
 # ZemmourLib <img src="man/figures/logo.png" align="right" height="138" />
 
-A collection of custom R functions primarily designed for analyzing single-cell RNA-seq and ADT data, especially useful with [Seurat](https://satijalab.org/seurat/) objects. It includes utilities for UMAP visualization, differential expression analysis with `limma-trend`, and other data processing tasks.
+A collection of custom R functions primarily designed for analyzing single-cell RNA-seq, especially useful with [Seurat](https://satijalab.org/seurat/) objects. It includes utilities for UMAP visualization, differential expression analysis with `limma-trend`, and other data processing tasks.
 
 ## Installation
 
@@ -59,6 +59,7 @@ Here are some brief examples to get you started. For more detailed usage and par
 library(ZemmourLib)
 library(Seurat)
 library(ggplot2)
+libary(dplyr)
 
 # --- Example 1: Using a Plotting Function ---
 # Assuming 'so' is a loaded Seurat object with UMAP embeddings and metadata
@@ -80,18 +81,19 @@ if (!exists("so")) {
 }
 
 # Example of MyPlots
-# MyPlots(so, color_by = "spleen_standard", split_by1 = "IGT", genes = c("gene1", "gene2"))
+MyPlots(so, color_by = "spleen_standard", split_by1 = "IGT", genes = c("gene1", "gene2"))
 
 # Example of MyDimPlotHighlight
-# highlight_colors <- c("TRUE" = "purple", "FALSE" = "lightgrey")
-# plot_list <- MyDimPlotHighlight(
-#   seurat_object = so,
-#   cells_to_highlight = names(which(so$nonconv_tcr_recog == TRUE)),
-#   highlight_column_name = "nonconv_tcr_recog",
-#   title = "Cells with Non-Conventional TCR Recognition",
-#   mycols = highlight_colors
-# )
-# print(plot_list$plot1)
+highlight_colors <- c("TRUE" = "purple", "FALSE" = "lightgrey")
+plot_list <- MyDimPlotHighlight(
+  seurat_object = so,
+  umap_to_plot = "umap_unintegrated",
+  cells_to_highlight = names(which(so$nonconv_tcr_recog == TRUE)),
+  highlight_column_name = "nonconv_tcr_recog",
+  title = "Cells with Non-Conventional TCR Recognition",
+  mycols = highlight_colors
+)
+print(plot_list$plot1)
 
 
 # --- Example 2: Differential Expression Analysis (Conceptual) ---
@@ -113,14 +115,14 @@ if (!exists("so")) {
 # print(comp_name) # Output: "Control_vs_Treated"
 
 # Example: Vplot (conceptual data)
-# vplot_data <- data.frame(
-#   fc = runif(1000, 0.1, 10),
-#   pval = runif(1000, 1e-10, 1),
-#   sig = sample(c("up", "down", "none"), 1000, replace = TRUE, prob = c(0.05, 0.05, 0.9))
-# )
-# p_vplot <- Vplot(vplot_data)
-# p_vplot_sig <- VplotAddSig(p_vplot, vplot_data)
-# print(p_vplot_sig)
+vplot_data <- data.frame(
+  fc = runif(1000, 0.1, 10),
+  pval = runif(1000, 1e-10, 1),
+  sig = sample(c("up", "down", "none"), 1000, replace = TRUE, prob = c(0.05, 0.05, 0.9))
+)
+p_vplot <- Vplot(vplot_data)
+p_vplot_sig <- VplotAddSig(p_vplot, vplot_data)
+print(p_vplot_sig)
 ```
 
 ## Contributing
@@ -131,25 +133,4 @@ Contributions to `ZemmourLib` are welcome\! If you have suggestions for improvem
 
 This package is licensed under the MIT License. See the `LICENSE` file for more details.
 
-````
-
----
-
-### How to Implement This `README.md`:
-
-1.  **Create `README.md`**: In the root directory of your `ZemmourLib` package, create a new file named `README.md`.
-2.  **Paste Content**: Copy the entire markdown content above and paste it into your new `README.md` file.
-3.  **Customize**:
-    * **Logo**: If you have a package logo (e.g., `logo.png`), save it in `man/figures/`. If not, remove the `<img>` tag from the first line.
-    * **Author/Email**: Double-check that `dzemmour` in `devtools::install_github("dzemmour/ZemmourLib")` matches your actual GitHub username.
-    * **Examples**: The provided examples are conceptual. You'll want to replace them with actual, runnable examples using either built-in dummy data, or clear instructions for users to provide their own data.
-    * **Further Details**: Add any other information you think would be helpful for users, such as typical workflows, known issues, or specific data requirements for your functions.
-4.  **Add, Commit, and Push**:
-    ```bash
-    git add README.md
-    git commit -m "Add README.md"
-    git push origin main # Or master, depending on your branch name
-    ```
-
-This `README.md` will now appear prominently on your GitHub repository page, providing a professional and informative introduction to your `ZemmourLib` package!
 ````

@@ -113,7 +113,7 @@ MyFeatureScatter = function(so = so,
                             split.by = NULL,
                             raster = T,
                             cols = rev(rainbow(10, end = 4/6)),
-                            ighlight_size = 1,
+                            highlight_size = 1,
                             highlight_alpha = 1) {
     requireNamespace("scattermore", quietly = TRUE)
     requireNamespace("ggplot2", quietly = TRUE)

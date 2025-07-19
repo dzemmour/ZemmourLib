@@ -13,7 +13,9 @@ MyFeatureScatter(
   group.by = sprintf("is_\%s", cl),
   split.by = NULL,
   raster = T,
-  cols = rev(rainbow(10, end = 4/6))
+  cols = rev(rainbow(10, end = 4/6)),
+  highlight_size = 1,
+  highlight_alpha = 1
 )
 }
 \arguments{

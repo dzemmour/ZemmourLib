@@ -104,7 +104,7 @@ ImmgenTFeaturePlots = function(so_orig, so_list = Seurat::SplitObject(so_orig, s
 #' @importFrom grDevices rainbow
 #' @return A ggplot object.
 #' @export
-MyFeatureScatter = function(so = so, assay = "ADT", slot = "data", feature1 = NULL, feature2 = NULL, group.by = sprintf("is_%s", cl), split.by = NULL, raster = T, cols = rev(rainbow(10, end = 4/6))) {
+MyFeatureScatter = function(so = so, assay = "ADT", slot = "data", feature1 = NULL, feature2 = NULL, group.by = sprintf("is_%s", cl), split.by = NULL, raster = T, cols = rev(rainbow(10, end = 4/6)), highlight_size = 1, highlight_alpha = 1) {
     requireNamespace("scattermore", quietly = TRUE)
     requireNamespace("ggplot2", quietly = TRUE)
 

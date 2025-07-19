@@ -96,6 +96,8 @@ ImmgenTFeaturePlots = function(so_orig, so_list = Seurat::SplitObject(so_orig, s
 #' @param split.by Character string, metadata column to split plots by using `facet_wrap`. Default is NULL.
 #' @param raster Logical, whether to use `geom_scattermore` for highlighted points (TRUE) or `geom_point` (FALSE). Default is TRUE.
 #' @param cols A character vector of colors to define the density color ramp. Default is `rev(rainbow(10, end = 4/6))`.
+#' @param highlight_size Numeric, point size for highlighted cells. Default is 1.
+#' @param highlight_alpha Numeric, alpha transparency for highlighted cells. Default is 1.
 #' @import ggplot2
 #' @importFrom scattermore geom_scattermore
 #' @importFrom grDevices densCols colorRampPalette
@@ -127,9 +129,9 @@ MyFeatureScatter = function(so = so, assay = "ADT", slot = "data", feature1 = NU
 
     p1 = ggplot(df) + scattermore::geom_scattermore(aes(feature1, feature2), color = "grey", pixels = c(512, 512))
     if (raster == T ){
-        p2 = scattermore::geom_scattermore(data = df2, aes(feature1, feature2, color = density),  pixels = c(216, 216))
+        p2 = scattermore::geom_scattermore(data = df2, aes(feature1, feature2, color = density), pointsize = highlight_size, pixels = c(216, 216))
     } else {
-        p2 = geom_point(data = df2, aes(feature1, feature2, color = density))
+        p2 = geom_point(data = df2, aes(feature1, feature2, color = density), size = highlight_size, alpha = highlight_alpha)
     }
     if(is.null(split.by)) {
         p3 = p1 + p2 + xlab(feature1) + ylab(feature2) +scale_colour_identity()+  theme_bw() + theme(axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), legend.text=element_text(size=10), axis.title.x = element_text(size=20) , axis.title.y = element_text(size=20), legend.title = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank())

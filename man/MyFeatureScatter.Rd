@@ -34,6 +34,10 @@ MyFeatureScatter(
 \item{raster}{Logical, whether to use \code{geom_scattermore} for highlighted points (TRUE) or \code{geom_point} (FALSE). Default is TRUE.}
 
 \item{cols}{A character vector of colors to define the density color ramp. Default is \code{rev(rainbow(10, end = 4/6))}.}
+
+\item{highlight_size}{Numeric, point size for highlighted cells. Default is 1.}
+
+\item{highlight_alpha}{Numeric, alpha transparency for highlighted cells. Default is 1.}
 }
 \value{
 A ggplot object.

@@ -5,6 +5,7 @@ A collection of custom R functions primarily designed for analyzing single-cell 
 ## Installation
 
 You can install the development version of `ZemmourLib` from GitHub with `devtools`:
+DO NOT INSTALL THE DEPENDENCIES when prompted you can always install needed dependencies later as needed)
 
 ```R
 # install.packages("devtools")

@@ -4,8 +4,9 @@
 A collection of custom R functions primarily designed for analyzing single-cell RNA-seq, especially useful with [Seurat](https://satijalab.org/seurat/) objects. It includes utilities for UMAP visualization, differential expression analysis with `limma-trend`, and other data processing tasks.
 ## Installation
 
-You can install the development version of `ZemmourLib` from GitHub with `devtools`:
-DO NOT INSTALL THE DEPENDENCIES when prompted you can always install needed dependencies later as needed)
+You can install the development version of `ZemmourLib` from GitHub with `devtools`.
+
+DO NOT INSTALL THE DEPENDENCIES WHEN PROMPTED. (You can always install needed dependencies later as needed)
 
 ```R
 # install.packages("devtools")

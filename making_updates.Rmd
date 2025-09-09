@@ -82,6 +82,7 @@ Open your `ZemmourLib` RStudio Project.
 Run `devtools::document()`: This command processes your roxygen comments, updates documentation files in `man/`, and regenerates the `NAMESPACE` file.
 
 ```{r}
+devtools::document()
 devtools::install()
 ```
 

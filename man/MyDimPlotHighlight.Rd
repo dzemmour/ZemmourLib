@@ -18,7 +18,9 @@ MyDimPlotHighlight(
   ylim = NULL,
   mycols = NULL,
   print_plot1 = TRUE,
-  print_plot2 = TRUE
+  print_plot2 = TRUE,
+  background_color = F,
+  background_alpha = 0.1
 )
 }
 \arguments{
@@ -49,6 +51,10 @@ MyDimPlotHighlight(
 \item{print_plot1}{Logical, whether to include the first plot (with legend) in the returned list. Default is TRUE.}
 
 \item{print_plot2}{Logical, whether to include the second plot (no legend) in the returned list. Default is TRUE.}
+
+\item{background_color}{Logical, whether to color the backrgound cells with same highlight_column_name. Default is FALSE (grey)}
+
+\item{background_alpha}{Numeric, alpha transparency for background cells (only when background_color = T). Default is 0.1.}
 }
 \value{
 A list containing ggplot objects: \code{plot1} (with legend), \code{plot2} (no legend), and optionally \code{plot3} (with labels).

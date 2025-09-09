@@ -269,6 +269,8 @@ MyPlots = function (seurat_object = so, dim1 = seurat_object[["umap_unintegrated
 #' @param title Character string, plot title. Default is "".
 #' @param labelclusters Logical, whether to add labels for highlighted clusters. Default is TRUE.
 #' @param pixels Numeric vector of length 2, pixel dimensions for `geom_scattermore`. Default is `c(512, 512)`.
+#' @param background_color Logical, whether to color the backrgound cells with same highlight_column_name. Default is FALSE (grey)
+#' @param background_alpha Numeric, alpha transparency for background cells (only when background_color = T). Default is 0.1.
 #' @param highlight_size Numeric, point size for highlighted cells. Default is 1.
 #' @param highlight_alpha Numeric, alpha transparency for highlighted cells. Default is 1.
 #' @param xlim Numeric vector of length 2, x-axis limits. Default is NULL (auto).
@@ -283,105 +285,174 @@ MyPlots = function (seurat_object = so, dim1 = seurat_object[["umap_unintegrated
 #' @importFrom Seurat NoLegend
 #' @return A list containing ggplot objects: `plot1` (with legend), `plot2` (no legend), and optionally `plot3` (with labels).
 #' @export
-MyDimPlotHighlight <- function(seurat_object = so,
-                               umap_to_plot = "mde_totalvi_20241201_gdT_rmIGTsample",
-                               cells_to_highlight = names(which(seurat_object$nonconv_tcr_recog == T)),
-                               highlight_column_name = "nonconv_tcr_recog",
-                               title = "",
-                               labelclusters = T,
-                               pixels = c(512, 512),
-                               highlight_size = 1,
-                               highlight_alpha = 1,
-                               xlim = NULL,
-                               ylim = NULL,
-                               mycols = NULL,
-                               print_plot1 = TRUE,
-                               print_plot2 = TRUE) {
-
-    requireNamespace("scattermore", quietly = TRUE) # Ensures scattermore is available
-    requireNamespace("ggplot2", quietly = TRUE) # Ensures ggplot2 is available
+MyDimPlotHighlight = function (seurat_object = so, umap_to_plot = "mde_totalvi_20241201_gdT_rmIGTsample",
+                                cells_to_highlight = names(which(seurat_object$nonconv_tcr_recog ==
+                                                                     T)), highlight_column_name = "nonconv_tcr_recog", title = "",
+                                labelclusters = T, pixels = c(512, 512), highlight_size = 1,
+                                highlight_alpha = 1, xlim = NULL, ylim = NULL, mycols = NULL,
+                                print_plot1 = TRUE, print_plot2 = TRUE, background_color = F, background_alpha = 0.1)
+{
+    requireNamespace("scattermore", quietly = TRUE)
+    requireNamespace("ggplot2", quietly = TRUE)
     requireNamespace("dplyr", quietly = TRUE)
     requireNamespace("rlang", quietly = TRUE)
     requireNamespace("Seurat", quietly = TRUE)
-
-    # Handle default mycols if not provided
     if (is.null(mycols)) {
-        # Using a simple default if mypal is not defined globally or passed
-        mycols <- c("TRUE" = "red", "FALSE" = "grey")
+        mycols <- c(`TRUE` = "red", `FALSE` = "grey")
     }
-
-    missing_names = setdiff(unique(seurat_object@meta.data[[highlight_column_name]]), names(mycols))
-
+    missing_names = setdiff(unique(seurat_object@meta.data[[highlight_column_name]]),
+                            names(mycols))
     if (length(missing_names) > 0) {
         if (any(is.na(names(mycols)))) {
             new_colors = mycols[which(is.na(names(mycols)))][seq_len(length(missing_names))]
-        } else {
-            # Fallback to a simple palette if no NA names, just pick from existing
+        }
+        else {
             new_colors = mycols[seq_len(length(missing_names))]
         }
         names(new_colors) <- missing_names
         color_mapping <- c(mycols[!is.na(names(mycols))], new_colors)
-    } else {
+    }
+    else {
         color_mapping = mycols
     }
-
-    # UMAP embeddings
     dim1 <- seurat_object[[umap_to_plot]]@cell.embeddings[, 1]
     dim2 <- seurat_object[[umap_to_plot]]@cell.embeddings[, 2]
     tmp <- data.frame(seurat_object@meta.data, dim1 = dim1, dim2 = dim2)
-
-    # Subset for highlighted cells
     tmp2 <- tmp[cells_to_highlight, ]
-
-    # Filter unique cluster labels present in cells_to_highlight
     highlight_values <- unique(tmp2[[highlight_column_name]])
+    if (background_color) {
+        bkrg <- ggplot(tmp) + scattermore::geom_scattermore(aes(dim1,
+                                                                dim2, color = !!rlang::sym(highlight_column_name)), pointsize = 0.5, alpha = background_alpha,
+                                                            pixels = pixels)
+    } else {
+        bkrg <- ggplot(tmp) + scattermore::geom_scattermore(aes(dim1,
+                                                                dim2), color = "grey50", pointsize = 0.5, alpha = 0.5,
+                                                            pixels = pixels)
+    }
+    p2 <- geom_point(data = tmp2, aes(dim1, dim2, color = !!rlang::sym(highlight_column_name)),
+                     size = highlight_size, alpha = highlight_alpha)
 
-    # Background plot
-    bkrg <- ggplot(tmp) +
-        scattermore::geom_scattermore(aes(dim1, dim2), color = "grey50", pointsize = 0.5, alpha = 0.5, pixels = pixels)
-
-    # Highlighted points
-    p2 <- geom_point(data = tmp2,
-                     aes(dim1, dim2, color = !!rlang::sym(highlight_column_name)),
-                     size = highlight_size,
-                     alpha = highlight_alpha)
-
-    # Plots with consistent colors
-    plot1 <- bkrg + p2 +
-        scale_color_manual(values = color_mapping) +
-        scale_x_continuous(limits = xlim) +
-        scale_y_continuous(limits = ylim) +
-        ggtitle(title) +
-        theme_minimal()
-
-    plot2 <- bkrg + p2 +
-        scale_color_manual(values = color_mapping) +
-        scale_x_continuous(limits = xlim) +
-        scale_y_continuous(limits = ylim) +
-        theme_void() + Seurat::NoLegend()
-
-    # Add cluster labels dynamically for only the present values
+    plot1 <- bkrg + p2 + scale_color_manual(values = color_mapping) +
+        scale_x_continuous(limits = xlim) + scale_y_continuous(limits = ylim) +
+        ggtitle(title) + theme_minimal() + ZemmourLib::NoGrid()
+    plot2 <- bkrg + p2 + scale_color_manual(values = color_mapping) +
+        scale_x_continuous(limits = xlim) + scale_y_continuous(limits = ylim) +
+        theme_void() + Seurat::NoLegend() + ZemmourLib::NoGrid()
     plot3 <- NULL
     if (labelclusters) {
-        tmp_labels <- tmp2 %>%
-            dplyr::filter(!!rlang::sym(highlight_column_name) %in% highlight_values) %>%
-            dplyr::group_by(!!rlang::sym(highlight_column_name)) %>%
+        tmp_labels <- tmp2 %>% dplyr::filter(!!rlang::sym(highlight_column_name) %in%
+                                                 highlight_values) %>% dplyr::group_by(!!rlang::sym(highlight_column_name)) %>%
             dplyr::summarise(dim1 = median(dim1), dim2 = median(dim2))
-
-        plot3 <- plot2 +
-            geom_text(data = tmp_labels,
-                      aes(x = dim1, y = dim2, label = !!rlang::sym(highlight_column_name),
-                          color = !!rlang::sym(highlight_column_name)),
-                      size = 4, show.legend = FALSE) +
-            scale_color_manual(values = color_mapping) +
-            scale_x_continuous(limits = xlim) +
-            scale_y_continuous(limits = ylim) +
-            ggtitle(title)
+        plot3 <- plot2 + geom_text(data = tmp_labels, aes(x = dim1,
+                                                          y = dim2, label = !!rlang::sym(highlight_column_name),
+                                                          color = !!rlang::sym(highlight_column_name)), size = 4,
+                                   show.legend = FALSE) + scale_color_manual(values = color_mapping) +
+            scale_x_continuous(limits = xlim) + scale_y_continuous(limits = ylim) +
+            ggtitle(title) + ZemmourLib::NoGrid()
     }
-
     plot_list = list(plot1 = plot1, plot2 = plot2, plot3 = plot3)
     return(plot_list)
 }
+
+# MyDimPlotHighlight <- function(seurat_object = so,
+#                                umap_to_plot = "mde_totalvi_20241201_gdT_rmIGTsample",
+#                                cells_to_highlight = names(which(seurat_object$nonconv_tcr_recog == T)),
+#                                highlight_column_name = "nonconv_tcr_recog",
+#                                title = "",
+#                                labelclusters = T,
+#                                pixels = c(512, 512),
+#                                highlight_size = 1,
+#                                highlight_alpha = 1,
+#                                xlim = NULL,
+#                                ylim = NULL,
+#                                mycols = NULL,
+#                                print_plot1 = TRUE,
+#                                print_plot2 = TRUE) {
+#
+#     requireNamespace("scattermore", quietly = TRUE) # Ensures scattermore is available
+#     requireNamespace("ggplot2", quietly = TRUE) # Ensures ggplot2 is available
+#     requireNamespace("dplyr", quietly = TRUE)
+#     requireNamespace("rlang", quietly = TRUE)
+#     requireNamespace("Seurat", quietly = TRUE)
+#
+#     # Handle default mycols if not provided
+#     if (is.null(mycols)) {
+#         # Using a simple default if mypal is not defined globally or passed
+#         mycols <- c("TRUE" = "red", "FALSE" = "grey")
+#     }
+#
+#     missing_names = setdiff(unique(seurat_object@meta.data[[highlight_column_name]]), names(mycols))
+#
+#     if (length(missing_names) > 0) {
+#         if (any(is.na(names(mycols)))) {
+#             new_colors = mycols[which(is.na(names(mycols)))][seq_len(length(missing_names))]
+#         } else {
+#             # Fallback to a simple palette if no NA names, just pick from existing
+#             new_colors = mycols[seq_len(length(missing_names))]
+#         }
+#         names(new_colors) <- missing_names
+#         color_mapping <- c(mycols[!is.na(names(mycols))], new_colors)
+#     } else {
+#         color_mapping = mycols
+#     }
+#
+#     # UMAP embeddings
+#     dim1 <- seurat_object[[umap_to_plot]]@cell.embeddings[, 1]
+#     dim2 <- seurat_object[[umap_to_plot]]@cell.embeddings[, 2]
+#     tmp <- data.frame(seurat_object@meta.data, dim1 = dim1, dim2 = dim2)
+#
+#     # Subset for highlighted cells
+#     tmp2 <- tmp[cells_to_highlight, ]
+#
+#     # Filter unique cluster labels present in cells_to_highlight
+#     highlight_values <- unique(tmp2[[highlight_column_name]])
+#
+#     # Background plot
+#     bkrg <- ggplot(tmp) +
+#         scattermore::geom_scattermore(aes(dim1, dim2), color = "grey50", pointsize = 0.5, alpha = 0.5, pixels = pixels)
+#
+#     # Highlighted points
+#     p2 <- geom_point(data = tmp2,
+#                      aes(dim1, dim2, color = !!rlang::sym(highlight_column_name)),
+#                      size = highlight_size,
+#                      alpha = highlight_alpha)
+#
+#     # Plots with consistent colors
+#     plot1 <- bkrg + p2 +
+#         scale_color_manual(values = color_mapping) +
+#         scale_x_continuous(limits = xlim) +
+#         scale_y_continuous(limits = ylim) +
+#         ggtitle(title) +
+#         theme_minimal()
+#
+#     plot2 <- bkrg + p2 +
+#         scale_color_manual(values = color_mapping) +
+#         scale_x_continuous(limits = xlim) +
+#         scale_y_continuous(limits = ylim) +
+#         theme_void() + Seurat::NoLegend()
+#
+#     # Add cluster labels dynamically for only the present values
+#     plot3 <- NULL
+#     if (labelclusters) {
+#         tmp_labels <- tmp2 %>%
+#             dplyr::filter(!!rlang::sym(highlight_column_name) %in% highlight_values) %>%
+#             dplyr::group_by(!!rlang::sym(highlight_column_name)) %>%
+#             dplyr::summarise(dim1 = median(dim1), dim2 = median(dim2))
+#
+#         plot3 <- plot2 +
+#             geom_text(data = tmp_labels,
+#                       aes(x = dim1, y = dim2, label = !!rlang::sym(highlight_column_name),
+#                           color = !!rlang::sym(highlight_column_name)),
+#                       size = 4, show.legend = FALSE) +
+#             scale_color_manual(values = color_mapping) +
+#             scale_x_continuous(limits = xlim) +
+#             scale_y_continuous(limits = ylim) +
+#             ggtitle(title)
+#     }
+#
+#     plot_list = list(plot1 = plot1, plot2 = plot2, plot3 = plot3)
+#     return(plot_list)
+# }
 
 #' Generate UMAP Plot with Highlighted Cell Density
 #'

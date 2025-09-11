@@ -22,7 +22,9 @@ Imports:
     scales,
     ggrepel,
     ggrastr,
-    pals
+    pals,
+    reshape2,
+    tibble
 Suggests: 
     Seurat,
     limma,

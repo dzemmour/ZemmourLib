@@ -40,6 +40,11 @@ devtools::install_github("dzemmour/ZemmourLib", dependencies = F)
 ### 3\. Milo Differential Abundance Analysis
 
   * **`MyplotDAbeeswarm()`**: Visualizes differential abundance results from `miloR` as a beeswarm plot.
+  
+### 4\. Flashier functions
+
+  * **`MyStructurePlot()`**: Visualizes topics/factors/gene programs as stacked barplots in each single cells.
+  * **`MyGeneTilePlot()`**: Visualizes top genes in topics/factors/gene programs.
 
 ### 4\. Utility Functions
 

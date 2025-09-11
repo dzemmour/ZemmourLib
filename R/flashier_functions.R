@@ -13,6 +13,7 @@
 #' @importFrom dplyr mutate
 #' @importFrom reshape2 melt
 #' @import ggplot2
+#' @export
 MyStructurePlot <- function(loadings_matrix, grouping_vector, topics, colors = mypal_topics, y_limit = c(0, 4), bar_width = 1) {
 
     # --- 1. Combine inputs into a single data frame ---
@@ -67,6 +68,7 @@ MyStructurePlot <- function(loadings_matrix, grouping_vector, topics, colors = m
 #' @return A ggplot object.
 #' @importFrom reshape2 melt
 #' @import ggplot2
+#' @export
 MyGeneTilePlot <- function(gene_factor_matrix,
                            topics = c("F68", "F27"),
                            n_genes_per_topic = 15,

@@ -10,7 +10,7 @@ DO NOT INSTALL THE DEPENDENCIES WHEN PROMPTED. (You can always install needed de
 
 ```R
 # install.packages("devtools")
-devtools::install_github("dzemmour/ZemmourLib")
+devtools::install_github("dzemmour/ZemmourLib", dependencies = F)
 ````
 
 ## Core Features

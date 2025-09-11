@@ -15,7 +15,7 @@ immgent_colors = readRDS("/Users/david/Library/CloudStorage/Box-Box/ZemmourLab_D
 
 usethis::use_data(immgent_colors, internal = FALSE, overwrite = TRUE) # internal = FALSE makes it externally available
 devtools::document()
-devtools::install()
+devtools::install(dependencies = F)
 ```
 
 ## Summary: Adding New Functions to Your R Package

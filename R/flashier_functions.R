@@ -1,16 +1,5 @@
 # flashier_functions.R
 
-#' A placeholder function for your custom ggplot theme.
-#' You should replace this with your actual NoGrid() function.
-NoGrid <- function() {
-    ggplot2::theme(panel.grid = ggplot2::element_blank())
-}
-
-#' A placeholder for your color palette.
-#' Replace this with your actual color palette.
-mypal_topics <- c("Topic1" = "blue", "Topic2" = "red", "Topic3" = "green")
-
-
 #' Creates a structured bar plot for topic expression across cell groups.
 #'
 #' @param loadings_matrix A matrix or data frame where rows are cells and columns are topics. Rownames must be cell IDs.

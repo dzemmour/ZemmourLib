@@ -84,7 +84,7 @@ Run `devtools::document()`: This command processes your roxygen comments, update
 
 ```{r}
 devtools::document()
-devtools::install()
+devtools::install(dependencies = F)
 ```
 
 ### 5. Test Your New Function

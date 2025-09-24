@@ -26,6 +26,7 @@ devtools::install_github("dzemmour/ZemmourLib", dependencies = F)
   * **`ConvertS5toS3()`**: Converts Seurat V5 objects to a Seurat V3-like structure.
   * **`PlotsAfterIntegration()`**: A specialized plotting function for visualizing Seurat objects post-integration.
   * **`AddLatentData()`**: Adds external latent space embeddings (e.g., from totalVI, MDE, PCA) into a Seurat object.
+  * **`MyDotPlot()`**: Dotplot with more controls on the colors, shape, split
 
 ### 2\. Differential Expression Analysis (DEA) with `limma-trend`
 
@@ -45,6 +46,7 @@ devtools::install_github("dzemmour/ZemmourLib", dependencies = F)
 
   * **`MyStructurePlot()`**: Visualizes topics/factors/gene programs as stacked barplots in each single cells.
   * **`MyGeneTilePlot()`**: Visualizes top genes in topics/factors/gene programs.
+  * **`FlashierDGE()`**: Calculate and plot differential genes and gene programs between two groups of cells using the fit/ldf model.
 
 ### 4\. Utility Functions
 

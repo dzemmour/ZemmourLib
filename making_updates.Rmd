@@ -76,6 +76,7 @@ If your new function introduces a dependency on a *new* package that is not alre
 Open `DESCRIPTION` and add the new package name, following the correct format (e.g., `NewPackage,` in `Imports:` or `Suggests:`).
 
 ### 4. Generate Documentation and Reinstall
+**Delete the `NAMESPACE` file**
 
 Open your `ZemmourLib` RStudio Project.
 **Delete the `NAMESPACE` file** in the root of your package directory (this ensures `roxygen2` generates a fresh one that includes your new function's exports/imports).

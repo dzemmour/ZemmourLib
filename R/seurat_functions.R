@@ -1,3 +1,191 @@
+#' Custom DotPlot Function for Seurat Objects
+#'
+#' Creates a dot plot to visualize gene expression by identity and feature. This is a modified version of Seurat's DotPlot with custom alpha and shape controls.
+#'
+#' @param object A Seurat object.
+#' @param features A vector of features to plot.
+#' @param assay The assay to pull the data from.
+#' @param cols A vector of colors to use.
+#' @param col.min Minimum value for color scaling.
+#' @param col.max Maximum value for color scaling.
+#' @param dot.min Minimum dot size.
+#' @param dot.scale Scale factor for dot sizes.
+#' @param idents Identity classes to include in the plot.
+#' @param group.by A grouping variable.
+#' @param split.by A variable to split the plot by.
+#' @param cluster.idents Whether to cluster identities.
+#' @param scale Whether to scale the expression.
+#' @param scale.by Method for scaling dot size.
+#' @param scale.min Minimum value for dot size.
+#' @param scale.max Maximum value for dot size.
+#' @param point.shape Shape of the points.
+#' @param alpha.range A vector of length 2 for alpha range.
+#' @param show.alpha.legend Whether to show the alpha legend.
+#'
+#' @return A ggplot object.
+#' @importFrom ggplot2 ggplot aes geom_point scale_radius scale_alpha theme_minimal theme element_blank labs facet_grid scale_fill_identity scale_fill_distiller scale_fill_gradient scale_fill_gradientn guides guide_colorbar guide_legend
+#' @importFrom Seurat `%||%` DefaultAssay CellsByIdentities FetchData MinMax
+#' @importFrom rlang .data
+#' @importFrom RColorBrewer brewer.pal.info
+#' @importFrom grid unit
+#' @export
+#' @examples
+#' \dontrun{
+#' # This example demonstrates the use of ImmgenTFeaturePlots.
+#' MyDotPlot(object = so, top_genes, assay = "RNA", group.by = "annotation_level2", dot.scale = 6, scale = T, scale.by = "radius",point.shape = 21, alpha.range = c(0, 1), show.alpha.legend = F)  +
+#' labs(y = topic, x = NULL) + scale_fill_gradientn(colours =  colorRampPalette(c("grey",'white','red'))(10)) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + coord_flip()
+#' } # End \dontrun
+
+MyDotPlot <- function (
+        object, features, assay = NULL,
+        cols = c("lightgrey", "blue"), col.min = -2.5, col.max = 2.5,
+        dot.min = 0, dot.scale = 6, idents = NULL, group.by = NULL,
+        split.by = NULL, cluster.idents = FALSE, scale = TRUE,
+        scale.by = "radius", scale.min = NA, scale.max = NA,
+        point.shape = 21,
+        alpha.range = c(0.2, 1.0),
+        show.alpha.legend = FALSE
+) {
+    # This code has been placed directly into your package.
+    # The original 'if (!requireNamespace(...))' checks are no longer needed
+    # as the package dependencies are handled by the Imports field in DESCRIPTION.
+
+    `%||%` <- Seurat::`%||%`
+    assay <- assay %||% Seurat::DefaultAssay(object)
+    Seurat::DefaultAssay(object) <- assay
+
+    split.colors <- !is.null(split.by) && !any(cols %in% rownames(RColorBrewer::brewer.pal.info))
+    scale.func <- switch(
+        scale.by,
+        size   = ggplot2::scale_size,
+        radius = ggplot2::scale_radius,
+        stop("'scale.by' must be either 'size' or 'radius'")
+    )
+
+    feature.groups <- NULL
+    if (is.list(features) || any(!is.na(names(features)))) {
+        feature.groups <- unlist(lapply(seq_along(features), function(i) rep(names(features)[i], length(features[[i]]))))
+        if (any(is.na(feature.groups))) warning("Some feature groups are unnamed.", call. = FALSE, immediate. = TRUE)
+        features <- unlist(features)
+        names(feature.groups) <- features
+    }
+
+    cells <- unlist(Seurat::CellsByIdentities(object, cells = colnames(object[[assay]]), idents = idents))
+    data.features <- Seurat::FetchData(object, vars = features, cells = cells)
+
+    data.features$id <- if (is.null(group.by)) Seurat::Idents(object)[cells, drop = TRUE] else object[[group.by, drop = TRUE]][cells, drop = TRUE]
+    if (!is.factor(data.features$id)) data.features$id <- factor(data.features$id)
+    id.levels <- levels(data.features$id)
+    data.features$id <- as.vector(data.features$id)
+
+    if (!is.null(split.by)) {
+        splits <- Seurat::FetchData(object, vars = split.by)[cells, split.by]
+        if (split.colors) {
+            if (length(unique(splits)) > length(cols)) stop(sprintf("Need at least %d colors in 'cols'", length(unique(splits))))
+            cols <- cols[seq_along(unique(splits))]
+            names(cols) <- unique(splits)
+        }
+        data.features$id <- paste(data.features$id, splits, sep = "_")
+        us <- unique(splits)
+        id.levels <- paste0(rep(id.levels, each = length(us)), "_", rep(us, times = length(id.levels)))
+    }
+
+    data.plot <- lapply(unique(data.features$id), function(ident) {
+        df <- data.features[data.features$id == ident, 1:(ncol(data.features) - 1), drop = FALSE]
+        avg.exp <- apply(df, 2, function(x) mean(expm1(x)))
+        pct.exp <- apply(df, 2, Seurat:::PercentAbove, threshold = 0)
+        list(avg.exp = avg.exp, pct.exp = pct.exp)
+    })
+    names(data.plot) <- unique(data.features$id)
+
+    if (cluster.idents) {
+        mat <- do.call(rbind, lapply(data.plot, unlist))
+        mat <- scale(mat)
+        id.levels <- id.levels[hclust(dist(mat))$order]
+    }
+
+    data.plot <- do.call(rbind, lapply(names(data.plot), function(x) {
+        d <- as.data.frame(data.plot[[x]])
+        d$features.plot <- rownames(d); d$id <- x; d
+    }))
+    if (!is.null(id.levels)) data.plot$id <- factor(data.plot$id, levels = id.levels)
+
+    ngroup <- length(levels(data.plot$id))
+    if (ngroup == 1) { scale <- FALSE; warning("Only one identity present; expression values will not be scaled", call. = FALSE, immediate. = TRUE) }
+    else if (ngroup < 5 && scale) { warning("Scaling with few groups can be misleading", call. = FALSE, immediate. = TRUE) }
+
+    # color-like variable (kept for fill mapping)
+    avg.exp.scaled <- sapply(unique(data.plot$features.plot), function(x) {
+        v <- data.plot[data.plot$features.plot == x, "avg.exp"]
+        if (scale) Seurat:::MinMax(scale(log1p(v)), min = col.min, max = col.max) else log1p(v)
+    })
+    avg.exp.scaled <- as.vector(t(avg.exp.scaled))
+    if (split.colors) avg.exp.scaled <- as.numeric(cut(avg.exp.scaled, breaks = 20))
+    data.plot$avg.exp.scaled <- avg.exp.scaled
+
+    # alpha driver: per-feature log1p → [0,1]
+    avg.exp.alpha <- sapply(unique(data.plot$features.plot), function(x) {
+        v <- data.plot[data.plot$features.plot == x, "avg.exp"]; v <- log1p(v); Seurat:::MinMax(v, min = 0, max = 1)
+    })
+    data.plot$alpha <- as.vector(t(avg.exp.alpha))
+
+    data.plot$features.plot <- factor(data.plot$features.plot, levels = features)
+    data.plot$pct.exp[data.plot$pct.exp < dot.min] <- NA
+    data.plot$pct.exp <- data.plot$pct.exp * 100
+
+    if (split.colors) {
+        splits.use <- unlist(lapply(data.plot$id, function(x)
+            sub(paste0(".*_(", paste(sort(unique(splits), decreasing = TRUE), collapse = "|"), ")$"), "\\1", x)))
+        data.plot$colors <- mapply(function(color, value) colorRampPalette(c("grey", color))(20)[value],
+                                   color = cols[splits.use], value = avg.exp.scaled)
+    }
+
+    fill.by <- if (split.colors) "colors" else "avg.exp.scaled"
+
+    if (!is.na(scale.min)) data.plot[data.plot$pct.exp < scale.min, "pct.exp"] <- scale.min
+    if (!is.na(scale.max)) data.plot[data.plot$pct.exp > scale.max, "pct.exp"] <- scale.max
+    if (!is.null(feature.groups)) data.plot$feature.groups <- factor(feature.groups[data.plot$features.plot], levels = unique(feature.groups))
+
+    plot <- ggplot2::ggplot(data.plot, ggplot2::aes(x = .data$features.plot, y = .data$id)) +
+        ggplot2::geom_point(
+            ggplot2::aes(size = .data$pct.exp,
+                         fill = .data[[fill.by]],
+                         alpha = .data$alpha),
+            shape = point.shape, colour = "black", stroke = 0.25
+        ) +
+        scale.func(range = c(0, dot.scale), limits = c(scale.min, scale.max)) +
+        ggplot2::scale_alpha(range = alpha.range, limits = c(0, 1)) +
+        ggplot2::theme_minimal(base_size = 11) +
+        ggplot2::theme(axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank())
+
+    if (!is.null(feature.groups)) {
+        plot <- plot +
+            ggplot2::facet_grid(~feature.groups, scales = "free_x", space = "free_x", switch = "y") +
+            ggplot2::theme(panel.spacing = grid::unit(1, "lines"), strip.background = ggplot2::element_blank())
+    }
+
+    if (split.colors) {
+        plot <- plot + ggplot2::scale_fill_identity()
+    } else if (length(cols) == 1) {
+        plot <- plot + ggplot2::scale_fill_distiller(palette = cols)
+    } else if (length(cols) == 2) {
+        plot <- plot + ggplot2::scale_fill_gradient(low = cols[1], high = cols[2])
+    } else {
+        plot <- plot + ggplot2::scale_fill_gradientn(colours = cols)
+    }
+
+    if (!split.colors) {
+        plot <- plot +
+            NoGrid() +
+            ggplot2::guides(
+                fill  = ggplot2::guide_colorbar(title = "Average Expression"),
+                size  = ggplot2::guide_legend(title = "Percent Expressed"),
+                alpha = if (show.alpha.legend) ggplot2::guide_legend(title = "Avg exp (α)") else "none"
+            )
+    }
+    return(plot)
+}
+
 #' Generate Feature Plots for ImmgenT Single-Cell Data
 #'
 #' This function creates a series of UMAP and Feature plots tailored for ImmgenT

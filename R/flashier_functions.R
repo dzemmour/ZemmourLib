@@ -119,3 +119,145 @@ MyGeneTilePlot <- function(gene_factor_matrix,
 
     return(p)
 }
+
+#' Perform differential gene expression (DGE) analysis with flashier results.
+#'
+#' This function calculates and visualizes differential expression for both gene programs (factors) and individual genes
+#' between two specified groups of cells. It returns two MA plots and data tables of the results.
+#'
+#' @param F1 A gene-by-factor matrix from a flashier fit.
+#' @param L1 A cell-by-factor matrix from a flashier fit.
+#' @param group1 A character vector of cell IDs belonging to the first group.
+#' @param group2 A character vector of cell IDs belonging to the second group.
+#' @param title_plot A character string for the title of the plots.
+#' @return A list containing:
+#'   \itemize{
+#'     \item \code{p1}: A ggplot object of the MA plot for factors.
+#'     \item \code{p2}: A ggplot object of the MA plot for genes.
+#'     \item \code{diff_factors}: A data frame of the differential expression results for factors.
+#'     \item \code{diff_genes}: A data frame of the differential expression results for genes.
+#'   }
+#' @importFrom dplyr %>%
+#' @importFrom ggplot2 ggplot aes geom_point xlim theme_minimal labs
+#' @importFrom ggrepel geom_text_repel
+#' @importFrom scattermore geom_scattermore
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Note: The following example assumes you have a 'fit.Rds' file
+#' # and a 'metadata_cells.txt' file in your working directory.
+#'
+#' # Get F1 and L1: Recommended for large datasets: Import from a flashier fit object
+#' fit = readRDS("fit.Rds")
+#' res = ldf(fit, type = "i")
+#' L1 = with(res, L %*% diag(D) )
+#' L1 = L1[mdata_orig$cellID,]
+#' colnames(L1) = sprintf("F%s", 1:ncol(L1))
+#' F1 = with(ldf(fit, type = "i"), F)
+#' colnames(F1) = paste("F", 1:ncol(F1), sep = "")
+#'
+#' # We'll create some dummy data for a runnable example.
+#' # In your actual use case, replace this with your real data loading code.
+#' F1 <- matrix(runif(1000 * 20), nrow = 1000, ncol = 20)
+#' L1 <- matrix(runif(500 * 20), nrow = 500, ncol = 20)
+#' rownames(L1) <- mdata_orig$cellID[1:500]
+#' rownames(F1) <- paste0("gene", 1:1000)
+#' colnames(L1) <- paste0("F", 1:20)
+#' colnames(F1) <- paste0("F", 1:20)
+#'
+#' # Define your groups based on metadata
+#' mdata_orig <- read.table("metadata_cells.txt", header = TRUE, sep = "\t")
+#' # Assuming mdata_orig has columns "cellID", "annotation_level1", etc.
+#' group1 <- mdata_orig %>%
+#'   dplyr::filter(annotation_level1 %in% c("Treg") &
+#'                 annotation_level2 %in% c("Treg_cl8") &
+#'                 organ_simplified == "colon" &
+#'                 condition_broad == "healthy") %>%
+#'   dplyr::pull(cellID)
+#'
+#' group2 <- mdata_orig %>%
+#'   dplyr::filter(annotation_level1 %in% c("Treg") &
+#'                 annotation_level2 %in% c("Treg_cl2") &
+#'                 organ_simplified == "colon" &
+#'                 condition_broad == "healthy") %>%
+#'   dplyr::pull(cellID)
+#'
+#' # Call the function
+#' results <- FlashierDGE(F1, L1, group1, group2,
+#'                        title_plot = "Treg_cl8 vs Treg_cl2 in colon healthy")
+#'
+#' # Access and display the plots and data
+#' results$p1    # MA plot of factors
+#' results$p2    # MA plot of genes
+#'
+#' results$diff_factors # table for fold changes of gene programs
+#'
+#' # Access and sort the gene fold changes
+#' results$diff_genes %>%
+#'   dplyr::arrange(dplyr::desc(log2FC))
+#' }
+
+FlashierDGE = function(F1, L1, group1, group2, title_plot = "") {
+
+    # Calculate the loadings
+    loadings_group1 = colMeans(L1[group1,])
+    loadings_group2 = colMeans(L1[group2,])
+    loadings_groups = colMeans(L1[c(group1, group2),])
+
+    # Mean genes for each group
+    mean_genes_group1 = F1 %*% loadings_group1
+    mean_genes_group2 = F1 %*% loadings_group2
+    mean_genes = F1 %*% colMeans(L1[c(group1, group2),])
+
+    # Fold Change between the two groups
+    fc_loadings = loadings_group1 - loadings_group2
+    fc_genes = F1 %*% fc_loadings %>% as.data.frame()
+
+    # Create vplot for fold changes (MA plot of factors)
+    vplot = data.frame(SYMBOL = names(fc_loadings), log2FC = fc_loadings / log(2), AveExpr = loadings_groups)
+
+    # Maximum FC for symmetrical x-axis range
+    max_fc = ceiling(max(abs(vplot$log2FC)))
+    top_genes = vplot %>%
+        dplyr::arrange(dplyr::desc(abs(log2FC))) %>%
+        utils::head(50)
+
+    # MA Plot (Factors)
+    p1 = ggplot2::ggplot(data = vplot) +
+        ggplot2::geom_point(ggplot2::aes(x = log2FC, y = AveExpr), colour = "black", alpha = I(1), size = I(1)) +
+        ggplot2::xlim(-max_fc, max_fc) +
+        ggrepel::geom_text_repel(data = top_genes, ggplot2::aes(x = log2FC, y = AveExpr, label = SYMBOL),
+                                 size = 3, color = "red", box.padding = 0.35, point.padding = 0.5, segment.color = 'grey50', max.overlaps  = 20) +
+        ggplot2::theme_minimal() +
+        ggplot2::labs(
+            x = "Fold Change (log2)",
+            y = "Average Expression",
+            title = title_plot
+        )
+
+    # Create vplot for gene expression (MA plot of genes)
+    vplot_genes = data.frame(SYMBOL = rownames(fc_genes), log2FC = fc_genes[,1] / log(2), AveExpr = mean_genes[,1])
+
+    # Maximum FC for symmetrical x-axis range (for genes)
+    max_fc_genes = ceiling(max(abs(vplot_genes$log2FC)))
+    top_genes_genes <- vplot_genes %>%
+        dplyr::arrange(dplyr::desc(abs(log2FC))) %>%
+        utils::head(50)
+
+    # MA Plot (Genes)
+    p2 <- ggplot2::ggplot(data = vplot_genes) +
+        scattermore::geom_scattermore(ggplot2::aes(x = log2FC, y = AveExpr), colour = "black", alpha = I(1), size = I(1), pixels = c(512, 512)) +
+        ggplot2::xlim(-max_fc_genes, max_fc_genes) +
+        ggrepel::geom_text_repel(data = top_genes_genes, ggplot2::aes(x = log2FC, y = AveExpr, label = SYMBOL),
+                                 size = 3, color = "red", box.padding = 0.35, point.padding = 0.5, segment.color = 'grey50', max.overlaps  = 20) +
+        ggplot2::theme_minimal() +
+        ggplot2::labs(
+            x = "Fold Change (log2)",
+            y = "Average Expression",
+            title = title_plot
+        )
+
+    # Return the plots and vplot tables
+    list(p1 = p1, p2 = p2, diff_factors = vplot, diff_genes = vplot_genes)
+}

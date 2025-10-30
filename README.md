@@ -22,6 +22,7 @@ devtools::install_github("dzemmour/ZemmourLib", dependencies = F)
   * **`ImmgenTFeaturePlots()`**: Generates a series of UMAP and Feature plots tailored for ImmgenT single-cell data, visualizing overall expression and expression within different annotation levels.
   * **`MyDimPlotHighlight()`**: Creates UMAP plots with specific cell subsets highlighted and optionally labeled.
   * **`MyDimPlotHighlightDensity()`**: Visualizes UMAPs with the density of highlighted cell populations.
+  * **`MyFeaturePlotHighlight()`**: Creates FeaturePlot of gene expression with specific cell subsets highlighted.
   * **`MyFeatureScatter()`**: Generates scatter plots (e.g., for ADT features) with highlighted population density, akin to flow cytometry plots.
   * **`ConvertS5toS3()`**: Converts Seurat V5 objects to a Seurat V3-like structure.
   * **`PlotsAfterIntegration()`**: A specialized plotting function for visualizing Seurat objects post-integration.

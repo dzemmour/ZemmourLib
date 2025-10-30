@@ -1,3 +1,75 @@
+#' Plot Gene Expression on a Subset of Cells with Full Dataset Background
+#'
+#' Creates a FeaturePlot-like visualization by plotting gene expression for a
+#' subset of cells over a grey background of all cells in the dataset.
+#'
+#' @param seurat_object A Seurat object containing the expression data and UMAP embeddings.
+#' @param feature A single character string of the gene name (e.g., "Foxp3").
+#' @param cells_to_highlight A character vector of cell IDs to use for the foreground plot.
+#' @param umap_to_plot A character string specifying the name of the DimReduc object (e.g., "umap", "mde2_totalvi_20241006").
+#' @param assay The assay slot to pull expression data from (e.g., "RNA", "SCT").
+#' @param colors A vector of colors for the continuous gradient scale (e.g., output of viridis(10)).
+#' @param title A character string for the plot title.
+#' @param pixels A numeric vector of length 2 defining the resolution for the background scattermore plot (e.g., c(512, 512)).
+#' @param highlight_size A numeric value for the size of the points in the foreground (highlighted cells).
+#' @param highlight_alpha A numeric value for the transparency of the points in the foreground (0 to 1).
+#' @param xlim A numeric vector of length 2 for the x-axis limits. If NULL, limits are determined automatically.
+#' @param ylim A numeric vector of length 2 for the y-axis limits. If NULL, limits are determined automatically.
+#' @param mycols DEPRECATED: Use \code{colors} instead. A vector of colors for the continuous gradient scale.
+#' @param background_alpha A numeric value for the transparency of the background points (0 to 1).
+#' @return A ggplot object.
+#' @importFrom Seurat GetAssayData
+#' @importFrom scattermore geom_scattermore
+#' @importFrom ggplot2 ggplot aes geom_point scale_color_gradientn theme_minimal labs coord_cartesian
+#' @export
+MyFeaturePlotHighlight <- function(seurat_object, feature, cells_to_highlight, umap_to_plot = "umap", assay = "RNA",
+                          colors = viridis::viridis(10), title = "", pixels = c(512, 512),
+                          highlight_size = 1, highlight_alpha = 1, xlim = NULL, ylim = NULL,
+                          background_alpha = 0.1) {
+
+    # 1. Prepare data for the full background
+    dim_data <- seurat_object[[umap_to_plot]]@cell.embeddings
+    dim1 <- dim_data[, 1]
+    dim2 <- dim_data[, 2]
+    tmp_all <- data.frame(seurat_object@meta.data, dim1 = dim1, dim2 = dim2)
+
+    # 2. Create the background plot (all cells in grey)
+    p_base <- ggplot2::ggplot(tmp_all) +
+        scattermore::geom_scattermore(ggplot2::aes(x = dim1, y = dim2),
+                                      color = "grey",
+                                      pointsize = 1, # pointsize for scattermore often remains 1
+                                      alpha = background_alpha, # NEW: Added background_alpha
+                                      pixels = pixels)          # NEW: Added pixels
+
+    # 3. Prepare data for the foreground (highlighted cells with feature expression)
+    feature_expr <- Seurat::GetAssayData(seurat_object, assay = assay, slot = "data")[feature, ]
+
+    # Subset the metadata/UMAP data to ONLY the cells being highlighted
+    tmp_highlight <- tmp_all[cells_to_highlight, ]
+    tmp_highlight$feature_value <- feature_expr[cells_to_highlight]
+
+    # 4. Add the foreground layer
+    p_final <- p_base +
+        ggplot2::geom_point(data = tmp_highlight,
+                            ggplot2::aes(x = dim1, y = dim2, color = feature_value),
+                            size = highlight_size, # NEW: Used highlight_size
+                            alpha = highlight_alpha) + # NEW: Used highlight_alpha
+        ggplot2::scale_color_gradientn(colours = colors, name = feature) +
+        ggplot2::theme_void() +
+        NoGrid() + # Assuming NoGrid is defined in your package
+        ggplot2::labs(title = title, # NEW: Used title
+                      x = paste0(umap_to_plot, "_1"),
+                      y = paste0(umap_to_plot, "_2"))
+
+    # NEW: Apply axis limits if provided
+    if (!is.null(xlim) || !is.null(ylim)) {
+        p_final <- p_final + ggplot2::coord_cartesian(xlim = xlim, ylim = ylim)
+    }
+
+    return(p_final)
+}
+
+
 #' Custom DotPlot Function for Seurat Objects
 #'
 #' Creates a dot plot to visualize gene expression by identity and feature. This is a modified version of Seurat's DotPlot with custom alpha and shape controls.

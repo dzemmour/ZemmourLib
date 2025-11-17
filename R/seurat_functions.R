@@ -726,6 +726,7 @@ MyDimPlotHighlight = function (seurat_object = so, umap_to_plot = "mde_totalvi_2
 #' @param raster Logical, whether to use `geom_scattermore` for highlighted points (TRUE) or `geom_point` (FALSE). Default is TRUE.
 #' @param highlight_size Numeric, point size for highlighted cells if `raster` is FALSE. Default is 0.5.
 #' @param highlight_alpha Numeric, alpha transparency for highlighted cells if `raster` is FALSE. Default is 0.5.
+#' @param highlight_pixels A numeric vector of length 2 defining the resolution for the highlighted cells if `raster` is TRUE. Default is `c(512,512)`.
 #' @param cols A character vector of colors to define the density color ramp. Default is `rev(rainbow(10, end = 4/6))`.
 #' @import ggplot2
 #' @importFrom scattermore geom_scattermore
@@ -733,7 +734,7 @@ MyDimPlotHighlight = function (seurat_object = so, umap_to_plot = "mde_totalvi_2
 #' @importFrom grDevices rainbow
 #' @return A ggplot object.
 #' @export
-MyDimPlotHighlightDensity = function(seurat_object = so, umap_to_plot = "mde_incremental",group.by = sprintf("is_%s", cl), split.by = NULL, raster = T, highlight_size = 0.5, highlight_alpha = 0.5, cols = rev(rainbow(10, end = 4/6))) {
+MyDimPlotHighlightDensity = function(seurat_object = so, umap_to_plot = "mde_incremental",group.by = sprintf("is_%s", cl), split.by = NULL, raster = T, highlight_size = 0.5, highlight_alpha = 0.5, highlight_pixels = c(512,512), cols = rev(rainbow(10, end = 4/6))) {
     requireNamespace("scattermore", quietly = TRUE)
     requireNamespace("ggplot2", quietly = TRUE)
 
@@ -747,7 +748,7 @@ MyDimPlotHighlightDensity = function(seurat_object = so, umap_to_plot = "mde_inc
 
     p1 = ggplot(df) + scattermore::geom_scattermore(aes(feature1, feature2), color = "grey", pixels = c(512, 512))
     if (raster == T ){
-        p2 = scattermore::geom_scattermore(data = df2, aes(feature1, feature2, color = density),  pixels = c(216, 216))
+        p2 = scattermore::geom_scattermore(data = df2, aes(feature1, feature2, color = density),  pixels = highlight_pixels)
     } else {
         p2 = geom_point(data = df2, aes(feature1, feature2, color = density), size = highlight_size, alpha = highlight_alpha)
     }

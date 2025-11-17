@@ -12,6 +12,7 @@ MyDimPlotHighlightDensity(
   raster = T,
   highlight_size = 0.5,
   highlight_alpha = 0.5,
+  highlight_pixels = c(512, 512),
   cols = rev(rainbow(10, end = 4/6))
 )
 }
@@ -29,6 +30,8 @@ MyDimPlotHighlightDensity(
 \item{highlight_size}{Numeric, point size for highlighted cells if \code{raster} is FALSE. Default is 0.5.}
 
 \item{highlight_alpha}{Numeric, alpha transparency for highlighted cells if \code{raster} is FALSE. Default is 0.5.}
+
+\item{highlight_pixels}{A numeric vector of length 2 defining the resolution for the highlighted cells if \code{raster} is TRUE. Default is \code{c(512,512)}.}
 
 \item{cols}{A character vector of colors to define the density color ramp. Default is \code{rev(rainbow(10, end = 4/6))}.}
 }

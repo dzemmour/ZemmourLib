@@ -7,10 +7,10 @@
 MyDimPlotHighlight(
   seurat_object = so,
   umap_to_plot = "mde_totalvi_20241201_gdT_rmIGTsample",
-  cells_to_highlight = names(which(seurat_object$nonconv_tcr_recog == T)),
+  cells_to_highlight = names(which(seurat_object$nonconv_tcr_recog == TRUE)),
   highlight_column_name = "nonconv_tcr_recog",
   title = "",
-  labelclusters = T,
+  labelclusters = TRUE,
   pixels = c(512, 512),
   highlight_size = 1,
   highlight_alpha = 1,
@@ -19,8 +19,10 @@ MyDimPlotHighlight(
   mycols = NULL,
   print_plot1 = TRUE,
   print_plot2 = TRUE,
-  background_color = F,
-  background_alpha = 0.1
+  background_color = FALSE,
+  background_alpha = 0.1,
+  highlight_raster = FALSE,
+  highlight_pixels = c(512, 512)
 )
 }
 \arguments{
@@ -55,6 +57,10 @@ MyDimPlotHighlight(
 \item{background_color}{Logical, whether to color the backrgound cells with same highlight_column_name. Default is FALSE (grey)}
 
 \item{background_alpha}{Numeric, alpha transparency for background cells (only when background_color = T). Default is 0.1.}
+
+\item{highlight_raster}{Logical, whether to rasterized highlighted cells. Default is FALSE}
+
+\item{highlight_pixels}{Numeric vector of length 2, pixel dimensions for \code{geom_scattermore} for highlighted cells. Default is \code{c(512, 512)}.}
 }
 \value{
 A list containing ggplot objects: \code{plot1} (with legend), \code{plot2} (no legend), and optionally \code{plot3} (with labels).

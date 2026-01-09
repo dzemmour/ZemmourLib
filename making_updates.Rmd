@@ -11,7 +11,8 @@ Add immgenT color palettes
 ```{r}
 library(devtools)
 
-immgent_colors = readRDS("/Users/david/Library/CloudStorage/Box-Box/ZemmourLab_David/ZemmourLib/data/immgent_color_palettes_list_20250714.Rds")
+# immgent_colors = readRDS("/Users/david/Library/CloudStorage/Box-Box/ZemmourLab_David/ZemmourLib/data/immgent_color_palettes_list_20250714.Rds")
+immgent_colors = readRDS("/Users/david/Library/CloudStorage/Box-Box/ZemmourLab_David/ZemmourLib/data/immgent_color_palettes_list_20260109.Rds")
 
 usethis::use_data(immgent_colors, internal = FALSE, overwrite = TRUE) # internal = FALSE makes it externally available
 devtools::document()
@@ -91,12 +92,21 @@ devtools::install(dependencies = F)
 
 Load your package and test the new function:
 
-````{r}
+```{r}
 library(ZemmourLib)
 my_new_helper(10, 2)
 ?my_new_helper # Check the help page
 ```
 
+### Create a new version of the library
+On github page:
+To Create a Tag (Release)
+This is best for creating a permanent snapshot of the current code (e.g., "Version 1.0").
+Click on Releases in the right sidebar (under the "About" section).
+Click "Draft a new release" (or "Create a new release").
+Click the "Choose a tag" dropdown.
+Type your version number (e.g., v0.1.1) and select "Create new tag: v0.1.1 on publish".
+Click "Publish release" at the bottom of the page. This creates the tag automatically.
 
 
 

@@ -12,7 +12,8 @@ Add immgenT color palettes
 library(devtools)
 
 # immgent_colors = readRDS("/Users/david/Library/CloudStorage/Box-Box/ZemmourLab_David/ZemmourLib/data/immgent_color_palettes_list_20250714.Rds")
-immgent_colors = readRDS("/Users/david/Library/CloudStorage/Box-Box/ZemmourLab_David/ZemmourLib/data/immgent_color_palettes_list_20260109.Rds")
+# immgent_colors = readRDS("/Users/david/Library/CloudStorage/Box-Box/ZemmourLab_David/ZemmourLib/data/immgent_color_palettes_list_20260109.Rds")
+immgent_colors = readRDS("/Users/david/Library/CloudStorage/Box-Box/ZemmourLab_David/ZemmourLib/data/immgent_color_palettes_list_20260206.Rds")
 
 usethis::use_data(immgent_colors, internal = FALSE, overwrite = TRUE) # internal = FALSE makes it externally available
 devtools::document()
@@ -109,4 +110,8 @@ Type your version number (e.g., v0.1.1) and select "Create new tag: v0.1.1 on pu
 Click "Publish release" at the bottom of the page. This creates the tag automatically.
 
 
+```{r}
+# This installs exactly the code you snapped in the v0.1.1 Release
+devtools::install_github("david/ZemmourLib@v0.1.1")
+```
 

@@ -109,6 +109,8 @@ Click the "Choose a tag" dropdown.
 Type your version number (e.g., v0.1.1) and select "Create new tag: v0.1.1 on publish".
 Click "Publish release" at the bottom of the page. This creates the tag automatically.
 
+now v0.1.1 is release and frozen.
+After that, make sure to update the `DESCRIPTION` file in your package to reflect the next working version number (e.g., `Version: 0.1.2`), and then commit and push this change to GitHub.
 
 ```{r}
 # This installs exactly the code you snapped in the v0.1.1 Release

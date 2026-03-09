@@ -24,7 +24,9 @@ Imports:
     ggrastr,
     pals,
     reshape2,
-    tibble
+    tibble,
+    magick,
+    png
 Suggests: 
     Seurat,
     limma,

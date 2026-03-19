@@ -4,16 +4,30 @@
 \alias{Vplot}
 \title{Create a V-Plot (Volcano Plot-like with Fold Change on X)}
 \usage{
-Vplot(vplot, xlab = "FC", xlimits = c(0.1, 10), ylimits = c(10^-300, 1))
+Vplot(
+  vplot,
+  xlab = "FC",
+  ylab = "p value",
+  xlimits = c(0.1, 10),
+  ylimits = c(10^-300, 1),
+  color = "grey",
+  size = 1
+)
 }
 \arguments{
 \item{vplot}{Data frame with columns \code{fc} (fold change) and \code{pval} (p-value).}
 
 \item{xlab}{Character string, label for the x-axis. Default is "FC".}
 
+\item{ylab}{Character string, label for the y-axis. Default is "p value".}
+
 \item{xlimits}{Numeric vector of length 2, x-axis limits (e.g., \code{c(0.1, 10)}).}
 
-\item{ylimits}{Numeric vector of length 2, y-axis limits (e.g., \code{c(10^-300,1)}).}
+\item{ylimits}{Numeric vector of length 2, y-axis limits (e.g., \code{c(10^-300, 1)}).}
+
+\item{color}{Character string, color of the points. Default is "grey".}
+
+\item{size}{Numeric, size of the points. Default is 1.}
 }
 \value{
 A ggplot object.
@@ -21,4 +35,44 @@ A ggplot object.
 \description{
 This function generates a V-plot to visualize gene expression changes,
 with fold change on the x-axis (log-transformed) and p-value on the y-axis (log-transformed).
+}
+\examples{
+\dontrun{
+# Format for the input data.frame: needs SYMBOL, fc and pval columns
+# Assumes 'df' is a results data frame (e.g., from limma or DESeq2)
+vplot_data <- data.frame(
+  SYMBOL = df$SYMBOL,
+  fc = 2^df$logFC,
+  pval = df$P.Value + 10^-300,
+  AveExpr = 2^(df$AveExpr)
+)
+
+# Create the base Vplot
+p <- Vplot(
+  vplot = vplot_data,
+  xlab = "Comparison Name",
+  xlimits = c(min(vplot_data$fc[vplot_data$fc != 0]), max(vplot_data$fc)),
+  ylimits = c(min(vplot_data$pval), 1),
+  color = "grey",
+  size = 1
+)
+
+# Filter and highlight top differentially expressed genes
+sub_indices <- (log2(vplot_data$fc) > 0.5 | log2(vplot_data$fc) < -0.5) & vplot_data$pval < 0.05
+sub_df <- vplot_data[sub_indices, ] \%>\%
+  dplyr::arrange(dplyr::desc(log2(fc)))
+
+up <- sub_df \%>\% dplyr::pull(SYMBOL) \%>\% head(25)
+down <- sub_df \%>\% dplyr::pull(SYMBOL) \%>\% tail(25)
+highlight_genes <- vplot_data$SYMBOL \%in\% c(up, down)
+
+# Add gene labels using ggrepel
+library(ggrepel)
+p + geom_text_repel(
+  data = vplot_data[highlight_genes, ],
+  aes(x = fc, y = pval, label = SYMBOL)
+) +
+ggplot2::ggtitle("A vs B") +
+ggplot2::xlab(sprintf("FC \%s", "A vs B"))
+}
 }

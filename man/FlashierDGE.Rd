@@ -32,7 +32,7 @@ between two specified groups of cells. It returns two MA plots and data tables o
 }
 \examples{
 \dontrun{
-# Note: The following example assumes you have a 'fit.Rds' file
+# Note: The following example assumes you have a 'fit.Rds' file or L1.Rds and F1.Rds already computed
 # and a 'metadata_cells.txt' file in your working directory.
 
 # Get F1 and L1: Recommended for large datasets: Import from a flashier fit object
@@ -43,6 +43,10 @@ L1 = L1[mdata_orig$cellID,]
 colnames(L1) = sprintf("F\%s", 1:ncol(L1))
 F1 = with(ldf(fit, type = "i"), F)
 colnames(F1) = paste("F", 1:ncol(F1), sep = "")
+
+# Or laod the precomputed L1 and F1
+L1 = readRDS('L1.Rds')) #cells x factor
+F1 = readRDS('F1.Rds")) #gene x factor
 
 # We'll create some dummy data for a runnable example.
 # In your actual use case, replace this with your real data loading code.
@@ -55,24 +59,25 @@ colnames(F1) <- paste0("F", 1:20)
 
 # Define your groups based on metadata
 mdata_orig <- read.table("metadata_cells.txt", header = TRUE, sep = "\t")
+# or from the seurat object: mdata_orig = so_orig@meta.data
 # Assuming mdata_orig has columns "cellID", "annotation_level1", etc.
 group1 <- mdata_orig \%>\%
   dplyr::filter(annotation_level1 \%in\% c("Treg") &
-                annotation_level2 \%in\% c("Treg_cl8") &
+                annotation_level2 \%in\% c("Treg.A") &
                 organ_simplified == "colon" &
                 condition_broad == "healthy") \%>\%
   dplyr::pull(cellID)
 
 group2 <- mdata_orig \%>\%
   dplyr::filter(annotation_level1 \%in\% c("Treg") &
-                annotation_level2 \%in\% c("Treg_cl2") &
+                annotation_level2 \%in\% c("Treg.E") &
                 organ_simplified == "colon" &
                 condition_broad == "healthy") \%>\%
   dplyr::pull(cellID)
 
 # Call the function
 results <- FlashierDGE(F1, L1, group1, group2,
-                       title_plot = "Treg_cl8 vs Treg_cl2 in colon healthy")
+                       title_plot = "Treg.A vs Treg.E in colon healthy")
 
 # Access and display the plots and data
 results$p1    # MA plot of factors

@@ -46,7 +46,7 @@ colnames(F1) = paste("F", 1:ncol(F1), sep = "")
 
 # Or laod the precomputed L1 and F1
 L1 = readRDS('L1.Rds')) #cells x factor
-F1 = readRDS('F1.Rds")) #gene x factor
+F1 = readRDS('F1.Rds')) #gene x factor
 
 # We'll create some dummy data for a runnable example.
 # In your actual use case, replace this with your real data loading code.

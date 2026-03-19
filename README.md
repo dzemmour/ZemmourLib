@@ -6,7 +6,10 @@ A collection of custom R functions primarily designed for analyzing single-cell 
 
 You can install the development version of `ZemmourLib` from GitHub with `devtools`.
 
+Requires ImageMagick/7.1.1-7 pre-installed (https://imagemagick.org/script/download.php#gsc.tab=0), e.g. through homebrew (https://formulae.brew.sh/formula/imagemagick)
 DO NOT INSTALL THE DEPENDENCIES WHEN PROMPTED. (You can always install needed dependencies later as needed)
+
+
 
 ```R
 # install.packages("devtools")

@@ -196,26 +196,98 @@ CollapseDiff_limmatrend = function(l) {
 #'
 #' @param vplot Data frame with columns `fc` (fold change) and `pval` (p-value).
 #' @param xlab Character string, label for the x-axis. Default is "FC".
+#' @param ylab Character string, label for the y-axis. Default is "p value".
 #' @param xlimits Numeric vector of length 2, x-axis limits (e.g., `c(0.1, 10)`).
-#' @param ylimits Numeric vector of length 2, y-axis limits (e.g., `c(10^-300,1)`).
+#' @param ylimits Numeric vector of length 2, y-axis limits (e.g., `c(10^-300, 1)`).
+#' @param color Character string, color of the points. Default is "grey".
+#' @param size Numeric, size of the points. Default is 1.
 #' @import ggplot2
 #' @importFrom ggrastr geom_point_rast
 #' @importFrom scales log_trans trans_breaks trans_format math_format
 #' @return A ggplot object.
 #' @export
-Vplot = function(vplot, xlab = "FC", xlimits = c(0.1, 10), ylimits = c(10^-300,1)) {
+#'
+#' @examples
+#' \dontrun{
+#' # Format for the input data.frame: needs SYMBOL, fc and pval columns
+#' # Assumes 'df' is a results data frame (e.g., from limma or DESeq2)
+#' vplot_data <- data.frame(
+#'   SYMBOL = df$SYMBOL,
+#'   fc = 2^df$logFC,
+#'   pval = df$P.Value + 10^-300,
+#'   AveExpr = 2^(df$AveExpr)
+#' )
+#'
+#' # Create the base Vplot
+#' p <- Vplot(
+#'   vplot = vplot_data,
+#'   xlab = "Comparison Name",
+#'   xlimits = c(min(vplot_data$fc[vplot_data$fc != 0]), max(vplot_data$fc)),
+#'   ylimits = c(min(vplot_data$pval), 1),
+#'   color = "grey",
+#'   size = 1
+#' )
+#'
+#' # Filter and highlight top differentially expressed genes
+#' sub_indices <- (log2(vplot_data$fc) > 0.5 | log2(vplot_data$fc) < -0.5) & vplot_data$pval < 0.05
+#' sub_df <- vplot_data[sub_indices, ] %>%
+#'   dplyr::arrange(dplyr::desc(log2(fc)))
+#'
+#' up <- sub_df %>% dplyr::pull(SYMBOL) %>% head(25)
+#' down <- sub_df %>% dplyr::pull(SYMBOL) %>% tail(25)
+#' highlight_genes <- vplot_data$SYMBOL %in% c(up, down)
+#'
+#' # Add gene labels using ggrepel
+#' library(ggrepel)
+#' p + geom_text_repel(
+#'   data = vplot_data[highlight_genes, ],
+#'   aes(x = fc, y = pval, label = SYMBOL)
+#' ) +
+#' ggplot2::ggtitle("A vs B") +
+#' ggplot2::xlab(sprintf("FC %s", "A vs B"))
+#' }
+Vplot <- function(vplot,
+                  xlab = "FC",
+                  ylab = "p value",
+                  xlimits = c(0.1, 10),
+                  ylimits = c(10^-300, 1),
+                  color = "grey",
+                  size = 1) {
+
     requireNamespace("ggplot2", quietly = TRUE)
     requireNamespace("ggrastr", quietly = TRUE)
     requireNamespace("scales", quietly = TRUE)
 
-    p = ggplot(data = vplot) + ggrastr::geom_point_rast(aes(x = .data$fc, y = .data$pval), colour = "grey", alpha = I(1), size = I(1), raster.dpi = 100) +
-        scale_x_continuous(trans = scales::log_trans(10), limits = xlimits) +
-        scale_y_continuous(trans = scales::log_trans(10), breaks = scales::trans_breaks("log10", function(x) 10^x), labels = scales::trans_format("log10", scales::math_format(10^.x)), limits = ylimits) +
-        annotation_logticks(sides = "b") +
-        xlab(xlab) +
-        theme_bw() +
-        ylab("p value") +
-        theme(axis.text.x  = element_text(size=20,angle = 0, hjust = 0.5), axis.text.y  = element_text(size=20), legend.text=element_text(size=20), axis.title.x = element_text(size=20) , axis.title.y = element_text(size=20))
+    p <- ggplot2::ggplot(data = vplot) +
+        ggrastr::geom_point_rast(
+            ggplot2::aes(x = .data$fc, y = .data$pval),
+            colour = color,
+            alpha = 1,
+            size = size,
+            raster.dpi = 100
+        ) +
+        ggplot2::scale_x_continuous(
+            trans = scales::log_trans(10),
+            limits = xlimits
+        ) +
+        ggplot2::scale_y_continuous(
+            trans = scales::log_trans(10),
+            breaks = scales::trans_breaks("log10", function(x) 10^x),
+            labels = scales::trans_format("log10", scales::math_format(10^.x)),
+            limits = ylimits
+        ) +
+        ggplot2::annotation_logticks(sides = "b") +
+        ggplot2::xlab(xlab) +
+        ggplot2::ylab(ylab) +
+        ggplot2::theme_bw() +
+        ggplot2::theme(
+            axis.text.x = ggplot2::element_text(size = 20, angle = 0, hjust = 0.5),
+            axis.text.y = ggplot2::element_text(size = 20),
+            legend.text = ggplot2::element_text(size = 20),
+            axis.title.x = ggplot2::element_text(size = 20),
+            axis.title.y = ggplot2::element_text(size = 20)
+        )
+
     return(p)
 }
 
